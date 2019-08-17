@@ -8,6 +8,17 @@ import (
 )
 
 func Print(files []*FileData) {
+	sort.Slice(files, func(i, j int) bool {
+		return files[i].Size() > files[j].Size()
+	})
+
+	format := formatter(files)
+	for _, f := range files {
+		fmt.Sprintf(format, f.Path(), ToHumanSize(f.Size()), f.Count())
+	}
+}
+
+func formatter(files []*FileData) string {
 	maxLenght := 0
 	for _, f := range files {
 		l := strings.Count(f.Path(), "")
@@ -15,13 +26,5 @@ func Print(files []*FileData) {
 			maxLenght = l
 		}
 	}
-
-	sort.Slice(files, func(i, j int) bool {
-		return files[i].Size() > files[j].Size()
-	})
-
-	format := "%-" + strconv.Itoa(maxLenght) + "s" + " %10s  items %-5d\n"
-	for _, f := range files {
-		fmt.Printf(format, f.Path(), ToHumanSize(f.Size()), f.Count())
-	}
+	return "%-" + strconv.Itoa(maxLenght) + "s" + " %10s  items %-5d\n"
 }

@@ -2,91 +2,55 @@ package gncdu
 
 import (
 	"fmt"
-	"strconv"
+	"sort"
 
-	"github.com/gdamore/tcell"
-	"github.com/gdamore/tcell/views"
+	"github.com/rivo/tview"
 )
 
-type App struct {
-	app   *views.Application
-	view  views.View
-	panel views.Widget
+func ShowUI(scanDir func() []*FileData) {
+	app := tview.NewApplication()
 
-	views.WidgetWatchers
-}
+	modal := tview.NewModal().
+		SetText("Scanning ...")
 
-func (a *App) Draw() {
-	if a.panel != nil {
-		a.panel.Draw()
+	go func() {
+		files := scanDir()
+		app.QueueUpdateDraw(func() {
+			showResult(app, files, []*FileData{})
+		})
+	}()
+
+	if err := app.SetRoot(modal, true).SetFocus(modal).Run(); err != nil {
+		panic(err)
 	}
 }
 
-func (a *App) Resize() {
-	if a.panel != nil {
-		a.panel.Resize()
+func showResult(app *tview.Application, files []*FileData, parent []*FileData) {
+	list := tview.NewList().
+		ShowSecondaryText(false)
+
+	if len(parent) != 0 {
+		list = list.AddItem("...", "", ' ', func() {
+			showResult(app, parent, []*FileData{})
+		})
 	}
-}
 
-func (a *App) HandleEvent(ev tcell.Event) bool {
-	switch ev := ev.(type) {
-	case *tcell.EventKey:
-		switch ev.Key() {
-		// Intercept a few control keys up front, for global handling.
-		case tcell.KeyCtrlC:
-			a.app.Quit()
-			return true
-		case tcell.KeyCtrlL:
-			a.app.Refresh()
-			return true
-		}
+	sort.Slice(files, func(i, j int) bool {
+		return files[i].Size() > files[j].Size()
+	})
+
+	format := formatter(files)
+
+	for _, file := range files {
+		name := fmt.Sprintf(format, file.Path(), ToHumanSize(file.Size()), file.Count())
+		list = list.AddItem(name, "", ' ', func(f *FileData) func() {
+			return func() {
+				if len(f.Children) <= 0 {
+					return
+				}
+				showResult(app, f.Children, files)
+			}
+		}(file))
 	}
-	return false
-}
-
-func (a *App) SetView(v views.View) {
-	if a.panel != nil {
-		a.panel.SetView(v)
-	}
-}
-
-func (a *App) Size() (int, int) {
-	if a.panel != nil {
-		return a.panel.Size()
-	}
-	return 0, 0
-}
-
-func (a *App) Run() {
-	fmt.Println("run")
-	a.app.SetRootWidget(a)
-	a.panel = mainView()
-	a.app.Run()
-}
-
-func NewApp() *App {
-	app := &App{}
-	app.app = &views.Application{}
-	return app
-}
-
-func mainView() views.Widget {
-	view := &views.Panel{}
-	titleBar := &views.SimpleStyledTextBar{}
-	titleBar.SetCenter("Hello world")
-	view.SetTitle(titleBar)
-
-	statusBar := &views.SimpleStyledTextBar{}
-	statusBar.SetCenter("[ctrl+c] close")
-	view.SetStatus(statusBar)
-
-	text := views.NewTextArea()
-	lines := []string{"Helo", "world"}
-	for i := 0; i < 20; i++ {
-		lines = append(lines, strconv.Itoa(i))
-	}
-	text.SetLines(lines)
-	text.EnableCursor(true)
-	view.SetContent(text)
-	return view
+	app.SetRoot(list, true)
 }
