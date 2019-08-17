@@ -7,6 +7,7 @@ import (
 )
 
 type FileData struct {
+	parent   *FileData
 	dir      string
 	info     os.FileInfo
 	size     int64
@@ -46,6 +47,12 @@ func ScanDir(dir string) ([]*FileData, error) {
 
 		data = append(data, fileData)
 	}
+
+	parent := &FileData{size: 0, count: 0, Children: data}
+	for _, file := range data {
+		file.parent = parent
+	}
+
 	close(ch)
 	wait.Wait()
 
@@ -74,7 +81,7 @@ func (d *FileData) scan() error {
 			size = file.Size()
 			count = 0
 		}
-		fileData := &FileData{dir: d.Path(), info: file, size: size, count: count}
+		fileData := &FileData{parent: d, dir: d.Path(), info: file, size: size, count: count}
 		fileData.scan()
 
 		children = append(children, fileData)
@@ -82,6 +89,10 @@ func (d *FileData) scan() error {
 	d.Children = children
 
 	return nil
+}
+
+func (d FileData) root() bool {
+	return d.info == nil
 }
 
 func (d FileData) Path() string {

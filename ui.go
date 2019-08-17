@@ -16,7 +16,7 @@ func ShowUI(scanDir func() []*FileData) {
 	go func() {
 		files := scanDir()
 		app.QueueUpdateDraw(func() {
-			showResult(app, files, []*FileData{})
+			showResult(app, files, nil)
 		})
 	}()
 
@@ -25,13 +25,17 @@ func ShowUI(scanDir func() []*FileData) {
 	}
 }
 
-func showResult(app *tview.Application, files []*FileData, parent []*FileData) {
+func showResult(app *tview.Application, files []*FileData, parent *FileData) {
 	list := tview.NewList().
 		ShowSecondaryText(false)
 
-	if len(parent) != 0 {
+	if parent != nil {
 		list = list.AddItem("...", "", ' ', func() {
-			showResult(app, parent, []*FileData{})
+			if parent.parent.root() {
+				showResult(app, parent.parent.Children, nil)
+			} else {
+				showResult(app, parent.parent.Children, parent.parent)
+			}
 		})
 	}
 
@@ -48,7 +52,7 @@ func showResult(app *tview.Application, files []*FileData, parent []*FileData) {
 				if len(f.Children) <= 0 {
 					return
 				}
-				showResult(app, f.Children, files)
+				showResult(app, f.Children, f)
 			}
 		}(file))
 	}
