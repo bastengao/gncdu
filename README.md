@@ -1,6 +1,6 @@
 # gncdu
 
-Implements [NCurses Disk Usage](https://dev.yorhel.nl/ncdu) with golang.
+Implements [NCurses Disk Usage](https://dev.yorhel.nl/ncdu)(ncdu) with golang.
 
 ## Install
 
