@@ -22,7 +22,7 @@ func ScanDir(dir string) ([]*FileData, error) {
 	}
 
 	data := []*FileData{}
-	ch := make(chan *FileData, 1024)
+	ch := make(chan *FileData, len(files))
 
 	var wait sync.WaitGroup
 	wait.Add(5)
@@ -43,7 +43,9 @@ func ScanDir(dir string) ([]*FileData, error) {
 			count = 0
 		}
 		fileData := &FileData{dir: dir, info: file, size: size, count: count}
-		ch <- fileData
+		if file.IsDir() {
+			ch <- fileData
+		}
 
 		data = append(data, fileData)
 	}
@@ -73,6 +75,15 @@ func (d *FileData) scan() error {
 		return err
 	}
 
+	if (len(files) == 0 || !hasDir(files)) {
+		d.ScanDirectly(files)
+	} else {
+		d.ScanConcurrent(files)
+	}
+	return nil
+}
+
+func (d *FileData) ScanDirectly(files []os.FileInfo) {
 	children := []*FileData{}
 	for _, file := range files {
 		var size int64 = -1
@@ -82,13 +93,47 @@ func (d *FileData) scan() error {
 			count = 0
 		}
 		fileData := &FileData{parent: d, dir: d.Path(), info: file, size: size, count: count}
-		fileData.scan()
+	    fileData.scan()
 
 		children = append(children, fileData)
 	}
-	d.Children = children
 
-	return nil
+	d.Children = children
+}
+
+func (d *FileData) ScanConcurrent(files []os.FileInfo) {
+	ch := make(chan *FileData, len(files))
+	var wait sync.WaitGroup
+	wait.Add(5)
+	for i := 0; i < 5; i++ {
+		go func(ch chan *FileData) {
+			for fileData := range ch {
+				fileData.scan()
+			}
+			wait.Done()
+		}(ch)
+	}
+
+	children := []*FileData{}
+	for _, file := range files {
+		var size int64 = -1
+		count := -1
+		if !file.IsDir() {
+			size = file.Size()
+			count = 0
+		}
+		fileData := &FileData{parent: d, dir: d.Path(), info: file, size: size, count: count}
+		if file.IsDir() {
+			ch <- fileData
+		}
+
+		children = append(children, fileData)
+	}
+
+	close(ch)
+	wait.Wait()
+
+	d.Children = children
 }
 
 func (d FileData) root() bool {
@@ -126,4 +171,13 @@ func (d *FileData) Size() int64 {
 	}
 	d.size = s
 	return s
+}
+
+func hasDir(files []os.FileInfo) bool {
+	for _, file := range files {
+		if file.IsDir() {
+			return true
+		}
+	}
+	return false
 }
