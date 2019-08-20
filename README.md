@@ -1,6 +1,6 @@
 # gncdu
 
-Implements [NCurses Disk Usage](https://dev.yorhel.nl/ncdu)(ncdu) with golang.
+gncdu implements [NCurses Disk Usage](https://dev.yorhel.nl/ncdu)(ncdu) with golang, and is at leaset twice faster as ncdu.
 
 ## Install
 
