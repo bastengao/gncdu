@@ -13,7 +13,8 @@ func main() {
 	}
 
 	gncdu.ShowUI(func() []*gncdu.FileData {
-		files, err := gncdu.ScanDir(dir)
+		files, err := gncdu.ScanDirConcurrent(dir)
+
 		if err != nil {
 			fmt.Println(err)
 		}
