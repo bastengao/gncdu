@@ -126,7 +126,8 @@ func showResultTable(app *tview.Application, files []*FileData, parent *FileData
 				SetAlign(tview.AlignRight))
 	}
 
-	app.SetRoot(newLayout(title, table), true)
+	layout := newLayout(title, table)
+	app.SetRoot(layout, true).SetFocus(layout)
 }
 
 func newLayout(title string, content tview.Primitive) tview.Primitive {
