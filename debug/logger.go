@@ -13,7 +13,7 @@ func init() {
 	if err != nil {
 		fmt.Println(err)
 	}
-	logger = log.New(file, "logger: ", log.Lshortfile)
+	logger = log.New(file, "logger: ", log.Ldate|log.Ltime|log.Lmicroseconds|log.Lshortfile)
 }
 
 func Info(s ...interface{}) {
