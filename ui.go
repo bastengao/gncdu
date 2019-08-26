@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"sort"
 	"strconv"
+	"time"
 
 	"github.com/gdamore/tcell"
 	"github.com/rivo/tview"
@@ -12,11 +13,27 @@ import (
 func ShowUI(scanDir func() []*FileData) {
 	app := tview.NewApplication()
 
+	done := make(chan bool)
+	go func() {
+		files := scanDir()
+		close(done)
+		app.QueueUpdateDraw(func() {
+			showResultTable(app, files, nil)
+		})
+	}()
+
+	scanningView := newScanningView(app, done)
+	if err := app.SetRoot(scanningView, true).SetFocus(scanningView).Run(); err != nil {
+		panic(err)
+	}
+}
+
+func newScanningView(app *tview.Application, done chan bool) tview.Primitive {
 	info := tview.NewTextView().
 		SetText("[ctrl+c] close")
 
 	modal := tview.NewModal().
-		SetText("Scanning ...")
+		SetText("Scanning       \n\nTime 0s")
 
 	layout := tview.NewFlex().
 		SetDirection(tview.FlexRow).
@@ -24,15 +41,27 @@ func ShowUI(scanDir func() []*FileData) {
 		AddItem(info, 1, 1, false)
 
 	go func() {
-		files := scanDir()
-		app.QueueUpdateDraw(func() {
-			showResultTable(app, files, nil)
-		})
+		tick := time.Tick(time.Millisecond * 500)
+		dots := []byte{'.', '.', '.', '.', '.', '.'}
+		spaces := []byte{' ', ' ', ' ', ' ', ' ', ' '}
+		count := 0
+		for {
+			select {
+			case <-tick:
+				count++
+				p := count % 7
+				s := string(dots[0:p])
+				b := string(spaces[0:(6 - p)])
+				app.QueueUpdateDraw(func() {
+					modal.SetText(fmt.Sprintf("Scanning %s%s\n\nTime %ds", s, b, count/2))
+				})
+			case <-done:
+				return
+			}
+		}
 	}()
 
-	if err := app.SetRoot(layout, true).SetFocus(layout).Run(); err != nil {
-		panic(err)
-	}
+	return layout
 }
 
 func showResultList(app *tview.Application, files []*FileData, parent *FileData) {
