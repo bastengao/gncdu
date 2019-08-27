@@ -111,7 +111,9 @@ func (p *ResultPage) Show() {
 	offset := 1
 	var title string
 	if p.parent != nil {
-		offset = 2
+		if !p.parent.root() {
+			offset = 2
+		}
 		title = p.parent.Path()
 	}
 
@@ -124,13 +126,8 @@ func (p *ResultPage) Show() {
 			}
 
 			if row == offset-1 {
-				if p.parent.parent.root() {
-					page := NewResultPage(p.app, p.parent.parent.Children, nil)
-					navigator.Push(page)
-				} else {
-					page := NewResultPage(p.app, p.parent.parent.Children, p.parent.parent)
-					navigator.Push(page)
-				}
+				page := NewResultPage(p.app, p.parent.parent.Children, p.parent.parent)
+				navigator.Push(page)
 				return
 			}
 
@@ -147,7 +144,7 @@ func (p *ResultPage) Show() {
 	table.SetCell(0, 1, tview.NewTableCell("Size").SetTextColor(color).SetSelectable(false))
 	table.SetCell(0, 2, tview.NewTableCell("Items").SetTextColor(color).SetSelectable(false))
 
-	if p.parent != nil {
+	if p.parent != nil && !p.parent.root() {
 		table.SetCellSimple(1, 0, "...")
 	}
 

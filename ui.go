@@ -20,8 +20,11 @@ func ShowUI(scanDir func() []*FileData) {
 		close(done)
 		isDone.Store(true)
 		app.QueueUpdateDraw(func() {
-			var resultPage Page
-			resultPage = NewResultPage(app, files, nil)
+			var parent *FileData
+			if len(files) > 0 {
+				parent = files[0].parent
+			}
+			resultPage := NewResultPage(app, files, parent)
 			navigator.Push(resultPage)
 		})
 	}()
@@ -42,7 +45,7 @@ func ShowUI(scanDir func() []*FileData) {
 
 func newInfoView() tview.Primitive {
 	return tview.NewTextView().
-		SetText("[ctrl+c] close  [?] help")
+		SetText("[ctrl+c] close    [d] delete    [?] help")
 }
 
 func newLayout(title string, content tview.Primitive) tview.Primitive {
