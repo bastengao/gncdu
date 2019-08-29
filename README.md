@@ -10,4 +10,4 @@ Download executable file from [releases](https://github.com/bastengao/gncdu/rele
 
     gncdu [path]
 
-![](http://bastengao.com/images/others/gncdu-screeshot.png)
+![screenshot](http://bastengao.com/images/others/gncdu-screenshot.png)
