@@ -2,6 +2,7 @@ package gncdu
 
 import (
 	"os"
+	"path/filepath"
 )
 
 type FileData struct {
@@ -36,7 +37,7 @@ func (d FileData) Path() string {
 		return d.dir
 	}
 
-	return d.dir + "/" + d.info.Name()
+	return filepath.Join(d.dir, d.info.Name())
 }
 
 func (d FileData) String() string {
@@ -60,12 +61,27 @@ func (d *FileData) Size() int64 {
 		return d.size
 	}
 
-	s := d.info.Size()
+	var s int64
+	if d.info != nil {
+		s += d.info.Size()
+	}
 	for _, f := range d.Children {
 		s += f.Size()
 	}
 	d.size = s
 	return s
+}
+
+func (d *FileData) SetChildren(children []*FileData) {
+	d.Children = children
+	d.size = -1
+	d.count = -1
+	d.Size()
+	d.Count()
+}
+
+func (d *FileData) delete() error {
+	return os.RemoveAll(d.Path())
 }
 
 func hasDir(files []os.FileInfo) bool {

@@ -138,6 +138,30 @@ func (p *ResultPage) Show() {
 			page := NewResultPage(p.app, file.Children, file)
 			navigator.Push(page)
 		})
+	table.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
+		if event.Rune() == 'd' {
+			row, _ := table.GetSelection()
+			if row == 0 {
+				return event
+			}
+			if row == offset-1 {
+				return event
+			}
+			i := row - offset
+			file := p.files[i]
+			confirm := func() {
+				err := file.delete()
+				if err != nil {
+					// TODO
+					return
+				}
+				p.files = append(p.files[:i], p.files[i+1:]...)
+				p.parent.SetChildren(p.files)
+			}
+			navigator.Push(NewDeleteConfirmPage(p.app, file.info.Name(), confirm))
+		}
+		return event
+	})
 
 	color := tcell.ColorYellow
 	table.SetCell(0, 0, tview.NewTableCell("Name").SetTextColor(color).SetSelectable(false))
@@ -171,13 +195,46 @@ func NewHelpPage(app *tview.Application) *HelpPage {
 }
 
 func (p *HelpPage) Show() {
+	text := `GNCDU v0.4.0
+
+	https://github.com/bastengao/gncdu
+	`
 	modal := tview.NewModal().
-		SetText("Help").
+		SetText(text).
 		AddButtons([]string{"OK"}).
 		SetDoneFunc(func(i int, l string) {
 			if i == 0 {
 				p.navigator.Pop()
 			}
+		})
+
+	layout := tview.NewFlex().
+		SetDirection(tview.FlexRow).
+		AddItem(modal, 0, 1, true).
+		AddItem(newInfoView(), 1, 1, false)
+
+	p.app.SetRoot(layout, true).SetFocus(layout)
+}
+
+type DeleteConfirmPage struct {
+	BasePage
+	name    string
+	confirm func()
+}
+
+func NewDeleteConfirmPage(app *tview.Application, name string, confirm func()) *DeleteConfirmPage {
+	return &DeleteConfirmPage{BasePage: BasePage{app: app}, name: name, confirm: confirm}
+}
+
+func (p *DeleteConfirmPage) Show() {
+	modal := tview.NewModal().
+		SetText(fmt.Sprintf("Are you sure want to delete \"%s\" ?", p.name)).
+		AddButtons([]string{"Cacnel", "OK"}).
+		SetDoneFunc(func(i int, l string) {
+			if i == 1 {
+				p.confirm()
+			}
+			p.navigator.Pop()
 		})
 
 	layout := tview.NewFlex().
