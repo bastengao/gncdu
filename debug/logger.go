@@ -17,5 +17,5 @@ func init() {
 }
 
 func Info(s ...interface{}) {
-	logger.Println(s)
+	logger.Println(s...)
 }
