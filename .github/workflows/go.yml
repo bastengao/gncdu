@@ -25,8 +25,7 @@ jobs:
         fi
 
     - name: Test
-      run: go test
-    
+      run: go test ./...
+
     - name: Build
-      working-directory: cmd
       run: go build -v .
