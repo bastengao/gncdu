@@ -16,14 +16,14 @@ func ScanDirConcurrent(dir string) ([]*FileData, error) {
 	for i := 0; i < 10; i++ {
 		go func() {
 			for file := range ch {
-				scanDir22(file, ch, closeWait)
+				scanDir(file, ch, closeWait)
 				closeWait.Done()
 			}
 			wait.Done()
 		}()
 	}
 
-	err := scanDir22(root, ch, closeWait)
+	err := scanDir(root, ch, closeWait)
 	if err != nil {
 		return nil, err
 	}
@@ -38,7 +38,7 @@ func ScanDirConcurrent(dir string) ([]*FileData, error) {
 	return root.Children, nil
 }
 
-func scanDir22(parent *FileData, ch chan *FileData, closeWait *sync.WaitGroup) error {
+func scanDir(parent *FileData, ch chan *FileData, closeWait *sync.WaitGroup) error {
 	if !parent.root() && (parent.size != -1 || !parent.info.IsDir()) {
 		return nil
 	}
