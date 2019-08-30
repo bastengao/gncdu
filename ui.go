@@ -1,13 +1,14 @@
 package gncdu
 
 import (
+	"fmt"
 	"sync/atomic"
 
 	"github.com/gdamore/tcell"
 	"github.com/rivo/tview"
 )
 
-func ShowUI(scanDir func() []*FileData) {
+func ShowUI(scanDir func() ([]*FileData, error)) {
 	app := tview.NewApplication()
 
 	var scanningPage Page
@@ -16,7 +17,12 @@ func ShowUI(scanDir func() []*FileData) {
 	var isDone atomic.Value
 	done := make(chan bool)
 	go func() {
-		files := scanDir()
+		files, err := scanDir()
+		if err != nil {
+			fmt.Println(err)
+			app.Stop()
+			return
+		}
 		close(done)
 		isDone.Store(true)
 		app.QueueUpdateDraw(func() {

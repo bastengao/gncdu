@@ -2,9 +2,10 @@ package main
 
 import (
 	"fmt"
-	"github.com/bastengao/gncdu"
 	"os"
 	"path/filepath"
+
+	"github.com/bastengao/gncdu"
 )
 
 func main() {
@@ -15,15 +16,16 @@ func main() {
 	dir, err := filepath.Abs(dir)
 	if err != nil {
 		fmt.Println(err)
+		return
 	}
 
-	gncdu.ShowUI(func() []*gncdu.FileData {
+	gncdu.ShowUI(func() ([]*gncdu.FileData, error) {
 		files, err := gncdu.ScanDirConcurrent(dir)
 
 		if err != nil {
-			fmt.Println(err)
+			return nil, err
 		}
 
-		return files
+		return files, nil
 	})
 }
