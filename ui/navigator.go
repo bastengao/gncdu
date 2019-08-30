@@ -1,4 +1,4 @@
-package gncdu
+package ui
 
 var navigator Navigator
 

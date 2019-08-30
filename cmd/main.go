@@ -5,7 +5,8 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/bastengao/gncdu"
+	"github.com/bastengao/gncdu/scan"
+	"github.com/bastengao/gncdu/ui"
 )
 
 func main() {
@@ -19,8 +20,8 @@ func main() {
 		return
 	}
 
-	gncdu.ShowUI(func() ([]*gncdu.FileData, error) {
-		files, err := gncdu.ScanDirConcurrent(dir)
+	ui.ShowUI(func() ([]*scan.FileData, error) {
+		files, err := scan.ScanDirConcurrent(dir)
 
 		if err != nil {
 			return nil, err

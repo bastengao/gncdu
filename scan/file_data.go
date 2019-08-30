@@ -1,4 +1,4 @@
-package gncdu
+package scan
 
 import (
 	"os"
@@ -6,9 +6,9 @@ import (
 )
 
 type FileData struct {
-	parent   *FileData
+	Parent   *FileData
 	dir      string
-	info     os.FileInfo
+	Info     os.FileInfo
 	size     int64
 	Children []*FileData
 	count    int
@@ -25,19 +25,19 @@ func newFileData(parant *FileData, file os.FileInfo) *FileData {
 		size = file.Size()
 		count = 0
 	}
-	return &FileData{parent: parant, dir: parant.Path(), info: file, size: size, count: count}
+	return &FileData{Parent: parant, dir: parant.Path(), Info: file, size: size, count: count}
 }
 
-func (d FileData) root() bool {
-	return d.info == nil
+func (d FileData) Root() bool {
+	return d.Info == nil
 }
 
 func (d FileData) Path() string {
-	if d.root() {
+	if d.Root() {
 		return d.dir
 	}
 
-	return filepath.Join(d.dir, d.info.Name())
+	return filepath.Join(d.dir, d.Info.Name())
 }
 
 func (d FileData) String() string {
@@ -62,8 +62,8 @@ func (d *FileData) Size() int64 {
 	}
 
 	var s int64
-	if d.info != nil {
-		s += d.info.Size()
+	if d.Info != nil {
+		s += d.Info.Size()
 	}
 	for _, f := range d.Children {
 		s += f.Size()
@@ -80,7 +80,7 @@ func (d *FileData) SetChildren(children []*FileData) {
 	d.Count()
 }
 
-func (d *FileData) delete() error {
+func (d *FileData) Delete() error {
 	return os.RemoveAll(d.Path())
 }
 

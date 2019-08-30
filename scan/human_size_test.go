@@ -1,4 +1,4 @@
-package gncdu
+package scan
 
 import (
 	"fmt"

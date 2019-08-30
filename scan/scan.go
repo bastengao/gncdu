@@ -1,4 +1,4 @@
-package gncdu
+package scan
 
 import (
 	"io/ioutil"
@@ -39,7 +39,7 @@ func ScanDirConcurrent(dir string) ([]*FileData, error) {
 }
 
 func scanDir(parent *FileData, ch chan *FileData, closeWait *sync.WaitGroup) error {
-	if !parent.root() && (parent.size != -1 || !parent.info.IsDir()) {
+	if !parent.Root() && (parent.size != -1 || !parent.Info.IsDir()) {
 		return nil
 	}
 

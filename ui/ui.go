@@ -1,14 +1,15 @@
-package gncdu
+package ui
 
 import (
 	"fmt"
 	"sync/atomic"
 
+	"github.com/bastengao/gncdu/scan"
 	"github.com/gdamore/tcell"
 	"github.com/rivo/tview"
 )
 
-func ShowUI(scanDir func() ([]*FileData, error)) {
+func ShowUI(scanDir func() ([]*scan.FileData, error)) {
 	app := tview.NewApplication()
 
 	var scanningPage Page
@@ -26,9 +27,9 @@ func ShowUI(scanDir func() ([]*FileData, error)) {
 		close(done)
 		isDone.Store(true)
 		app.QueueUpdateDraw(func() {
-			var parent *FileData
+			var parent *scan.FileData
 			if len(files) > 0 {
-				parent = files[0].parent
+				parent = files[0].Parent
 			}
 			resultPage := NewResultPage(app, files, parent)
 			navigator.Push(resultPage)

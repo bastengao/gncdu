@@ -1,4 +1,4 @@
-package gncdu
+package ui
 
 import (
 	"fmt"
@@ -6,6 +6,7 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/bastengao/gncdu/scan"
 	"github.com/gdamore/tcell"
 	"github.com/rivo/tview"
 )
@@ -91,11 +92,11 @@ func (p *ScanningPage) Dispose() {
 
 type ResultPage struct {
 	BasePage
-	files  []*FileData
-	parent *FileData
+	files  []*scan.FileData
+	parent *scan.FileData
 }
 
-func NewResultPage(app *tview.Application, files []*FileData, parent *FileData) *ResultPage {
+func NewResultPage(app *tview.Application, files []*scan.FileData, parent *scan.FileData) *ResultPage {
 	return &ResultPage{
 		BasePage: BasePage{app: app},
 		files:    files,
@@ -111,7 +112,7 @@ func (p *ResultPage) Show() {
 	offset := 1
 	var title string
 	if p.parent != nil {
-		if !p.parent.root() {
+		if !p.parent.Root() {
 			offset = 2
 		}
 		title = p.parent.Path()
@@ -126,13 +127,13 @@ func (p *ResultPage) Show() {
 			}
 
 			if row == offset-1 {
-				page := NewResultPage(p.app, p.parent.parent.Children, p.parent.parent)
+				page := NewResultPage(p.app, p.parent.Parent.Children, p.parent.Parent)
 				navigator.Push(page)
 				return
 			}
 
 			file := p.files[row-offset]
-			if !file.info.IsDir() {
+			if !file.Info.IsDir() {
 				return
 			}
 			page := NewResultPage(p.app, file.Children, file)
@@ -150,7 +151,7 @@ func (p *ResultPage) Show() {
 			i := row - offset
 			file := p.files[i]
 			confirm := func() {
-				err := file.delete()
+				err := file.Delete()
 				if err != nil {
 					// TODO
 					return
@@ -158,7 +159,7 @@ func (p *ResultPage) Show() {
 				p.files = append(p.files[:i], p.files[i+1:]...)
 				p.parent.SetChildren(p.files)
 			}
-			navigator.Push(NewDeleteConfirmPage(p.app, file.info.Name(), confirm))
+			navigator.Push(NewDeleteConfirmPage(p.app, file.Info.Name(), confirm))
 		}
 		return event
 	})
@@ -168,14 +169,14 @@ func (p *ResultPage) Show() {
 	table.SetCell(0, 1, tview.NewTableCell("Size").SetTextColor(color).SetSelectable(false))
 	table.SetCell(0, 2, tview.NewTableCell("Items").SetTextColor(color).SetSelectable(false))
 
-	if p.parent != nil && !p.parent.root() {
+	if p.parent != nil && !p.parent.Root() {
 		table.SetCellSimple(1, 0, "...")
 	}
 
 	for i, file := range p.files {
-		table.SetCellSimple(i+offset, 0, file.info.Name())
+		table.SetCellSimple(i+offset, 0, file.Info.Name())
 		table.SetCell(i+offset, 1,
-			tview.NewTableCell(ToHumanSize(file.Size())).
+			tview.NewTableCell(scan.ToHumanSize(file.Size())).
 				SetAlign(tview.AlignRight))
 		table.SetCell(i+offset, 2,
 			tview.NewTableCell(strconv.Itoa((file.Count()))).
