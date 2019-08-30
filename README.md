@@ -6,6 +6,8 @@ gncdu implements [NCurses Disk Usage](https://dev.yorhel.nl/ncdu)(ncdu) with gol
 
 Download executable file from [releases](https://github.com/bastengao/gncdu/releases) page.
 
+Or execute `go install github.com/bastengao/gncdu`.
+
 ## Usage
 
     gncdu [path]
