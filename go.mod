@@ -1,4 +1,4 @@
-module gncdu
+module github.com/bastengao/gncdu
 
 go 1.12
 

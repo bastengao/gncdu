@@ -2,7 +2,7 @@ package main
 
 import (
 	"fmt"
-	"gncdu"
+	"github.com/bastengao/gncdu"
 	"os"
 	"path/filepath"
 )
