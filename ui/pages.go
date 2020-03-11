@@ -67,6 +67,7 @@ func (page *ScanningPage) Show() {
 		dots := []byte{'.', '.', '.', '.', '.', '.'}
 		spaces := []byte{' ', ' ', ' ', ' ', ' ', ' '}
 		count := 0
+		start := time.Now()
 		for {
 			select {
 			case <-tick:
@@ -75,7 +76,7 @@ func (page *ScanningPage) Show() {
 				s := string(dots[0:p])
 				b := string(spaces[0:(6 - p)])
 				page.app.QueueUpdateDraw(func() {
-					modal.SetText(fmt.Sprintf("Scanning %s%s\n\nTime %ds", s, b, count/2))
+					modal.SetText(fmt.Sprintf("Scanning %s%s\n\nTime %ds", s, b, int(time.Now().Sub(start).Seconds())))
 				})
 			case <-page.done:
 				return
