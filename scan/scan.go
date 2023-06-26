@@ -2,18 +2,23 @@ package scan
 
 import (
 	"io/ioutil"
+	"runtime"
 	"sync"
 )
 
-func ScanDirConcurrent(dir string) ([]*FileData, error) {
+func ScanDirConcurrent(dir string, concurrency int) ([]*FileData, error) {
 	root := newRootFileData(dir)
+
+	if concurrency == 0 {
+		concurrency = DefaultConcurrency()
+	}
 
 	ch := make(chan *FileData)
 	closeWait := &sync.WaitGroup{}
 
 	var wait sync.WaitGroup
-	wait.Add(10)
-	for i := 0; i < 10; i++ {
+	wait.Add(concurrency)
+	for i := 0; i < concurrency; i++ {
 		go func() {
 			for file := range ch {
 				scanDir(file, ch, closeWait)
@@ -36,6 +41,16 @@ func ScanDirConcurrent(dir string) ([]*FileData, error) {
 	wait.Wait()
 
 	return root.Children, nil
+}
+
+func DefaultConcurrency() int {
+	maxProcs := runtime.GOMAXPROCS(0)
+	numCPU := runtime.NumCPU()
+	if maxProcs < numCPU {
+		return maxProcs
+	}
+
+	return numCPU
 }
 
 func scanDir(parent *FileData, ch chan *FileData, closeWait *sync.WaitGroup) error {

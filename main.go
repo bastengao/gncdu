@@ -1,18 +1,29 @@
 package main
 
 import (
+	"flag"
 	"fmt"
-	"os"
 	"path/filepath"
 
 	"github.com/bastengao/gncdu/scan"
 	"github.com/bastengao/gncdu/ui"
 )
 
+var cFlag = flag.Int("c", scan.DefaultConcurrency(), "the number of concurrent scanners, default is number of CPU")
+var helpFlag = flag.Bool("help", false, "help")
+
 func main() {
+	flag.Parse()
+
+	if helpFlag != nil && *helpFlag {
+		flag.Usage()
+		return
+	}
+
 	dir := "."
-	if len(os.Args) > 1 {
-		dir = os.Args[1]
+	args := flag.Args()
+	if len(args) > 0 {
+		dir = args[0]
 	}
 	dir, err := filepath.Abs(dir)
 	if err != nil {
@@ -21,7 +32,7 @@ func main() {
 	}
 
 	ui.ShowUI(func() ([]*scan.FileData, error) {
-		files, err := scan.ScanDirConcurrent(dir)
+		files, err := scan.ScanDirConcurrent(dir, *cFlag)
 
 		if err != nil {
 			return nil, err
