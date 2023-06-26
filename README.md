@@ -12,4 +12,4 @@ Or execute `go install github.com/bastengao/gncdu`.
 
     gncdu [path]
 
-![screenshot](http://bastengao.com/images/others/gncdu-screenshot.png)
+![screenshot](http://bastengao.com/images/others/gncdu-screenshot-v0.6.0.png)
