@@ -205,7 +205,7 @@ func NewHelpPage(app *tview.Application) *HelpPage {
 }
 
 func (p *HelpPage) Show() {
-	text := `GNCDU v0.5.0
+	text := `GNCDU v0.6.0
 
 	https://github.com/bastengao/gncdu
 	`
