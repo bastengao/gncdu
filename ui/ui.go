@@ -5,7 +5,7 @@ import (
 	"sync/atomic"
 
 	"github.com/bastengao/gncdu/scan"
-	"github.com/gdamore/tcell"
+	"github.com/gdamore/tcell/v2"
 	"github.com/rivo/tview"
 )
 

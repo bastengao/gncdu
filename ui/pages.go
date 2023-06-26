@@ -7,7 +7,7 @@ import (
 	"time"
 
 	"github.com/bastengao/gncdu/scan"
-	"github.com/gdamore/tcell"
+	"github.com/gdamore/tcell/v2"
 	"github.com/rivo/tview"
 )
 
@@ -119,10 +119,12 @@ func (p *ResultPage) Show() {
 		title = p.parent.Path()
 	}
 
+	selectedStyle := tcell.StyleDefault.Foreground(tcell.ColorBlack).Background(tcell.ColorWhite)
+
 	table := tview.NewTable().
 		SetFixed(1, 1).
 		SetSelectable(true, false).
-		SetSelectedStyle(tcell.ColorBlack, tcell.ColorWhite, 0).
+		SetSelectedStyle(selectedStyle).
 		SetSelectedFunc(func(row, column int) {
 			if row == 0 {
 				return
