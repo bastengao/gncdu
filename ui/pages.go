@@ -2,8 +2,10 @@ package ui
 
 import (
 	"fmt"
+	"math"
 	"sort"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/bastengao/gncdu/scan"
@@ -171,16 +173,22 @@ func (p *ResultPage) Show() {
 	color := tcell.ColorYellow
 	table.SetCell(0, 0, tview.NewTableCell("Name").SetTextColor(color).SetSelectable(false))
 	table.SetCell(0, 1, tview.NewTableCell("Size").SetTextColor(color).SetSelectable(false))
-	table.SetCell(0, 2, tview.NewTableCell("Items").SetTextColor(color).SetSelectable(false))
+	table.SetCell(0, 2, tview.NewTableCell("").SetTextColor(color).SetSelectable(false))
+	table.SetCell(0, 3, tview.NewTableCell("Items").SetTextColor(color).SetSelectable(false))
 
 	if p.parent != nil && !p.parent.Root() {
 		table.SetCell(1, 0, tview.NewTableCell("/.."))
 	}
 
+	var maxSize int64
 	for i, file := range p.files {
 		nameColor := tcell.ColorWhite
 		if file.Info.IsDir() {
 			nameColor = tcell.ColorDeepSkyBlue
+		}
+
+		if i == 0 {
+			maxSize = file.Size()
 		}
 
 		table.SetCell(i+offset, 0,
@@ -190,12 +198,32 @@ func (p *ResultPage) Show() {
 			tview.NewTableCell(scan.ToHumanSize(file.Size())).
 				SetAlign(tview.AlignRight))
 		table.SetCell(i+offset, 2,
+			tview.NewTableCell(percentageText(maxSize, file.Size())).
+				SetAlign(tview.AlignLeft))
+		table.SetCell(i+offset, 3,
 			tview.NewTableCell(strconv.Itoa((file.Count()))).
 				SetAlign(tview.AlignRight))
 	}
 
 	layout := newLayout(title, table)
 	p.app.SetRoot(layout, true).SetFocus(layout)
+}
+
+func percentageText(total int64, part int64) string {
+	var sb strings.Builder
+	sb.WriteString("[")
+
+	percentage := int(math.Round(float64(part) / float64(total) * 20))
+	for i := 1; i <= 20; i++ {
+		if i <= percentage {
+			sb.WriteString("#")
+		} else {
+			sb.WriteString(" ")
+		}
+	}
+
+	sb.WriteString("]")
+	return sb.String()
 }
 
 type HelpPage struct {
