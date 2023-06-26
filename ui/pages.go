@@ -122,6 +122,7 @@ func (p *ResultPage) Show() {
 	table := tview.NewTable().
 		SetFixed(1, 1).
 		SetSelectable(true, false).
+		SetSelectedStyle(tcell.ColorBlack, tcell.ColorWhite, 0).
 		SetSelectedFunc(func(row, column int) {
 			if row == 0 {
 				return
@@ -171,11 +172,18 @@ func (p *ResultPage) Show() {
 	table.SetCell(0, 2, tview.NewTableCell("Items").SetTextColor(color).SetSelectable(false))
 
 	if p.parent != nil && !p.parent.Root() {
-		table.SetCellSimple(1, 0, "...")
+		table.SetCell(1, 0, tview.NewTableCell("/.."))
 	}
 
 	for i, file := range p.files {
-		table.SetCellSimple(i+offset, 0, file.Info.Name())
+		nameColor := tcell.ColorWhite
+		if file.Info.IsDir() {
+			nameColor = tcell.ColorDeepSkyBlue
+		}
+
+		table.SetCell(i+offset, 0,
+			tview.NewTableCell(file.Label()).
+				SetTextColor(nameColor))
 		table.SetCell(i+offset, 1,
 			tview.NewTableCell(scan.ToHumanSize(file.Size())).
 				SetAlign(tview.AlignRight))

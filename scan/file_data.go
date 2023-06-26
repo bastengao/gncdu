@@ -32,6 +32,18 @@ func (d FileData) Root() bool {
 	return d.Info == nil
 }
 
+func (d FileData) Label() string {
+	if d.Root() {
+		return "/.."
+	}
+
+	if d.Info.IsDir() {
+		return d.Info.Name() + "/"
+	}
+
+	return d.Info.Name()
+}
+
 func (d FileData) Path() string {
 	if d.Root() {
 		return d.dir

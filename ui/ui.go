@@ -12,8 +12,7 @@ import (
 func ShowUI(scanDir func() ([]*scan.FileData, error)) {
 	app := tview.NewApplication()
 
-	var scanningPage Page
-	scanningPage = NewScanningPage(app)
+	var scanningPage Page = NewScanningPage(app)
 
 	var isDone atomic.Value
 	done := make(chan bool)
