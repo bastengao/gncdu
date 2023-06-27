@@ -16,6 +16,7 @@ func main() {
 	flag.Parse()
 
 	if helpFlag != nil && *helpFlag {
+		fmt.Printf("gncdu %s\n", ui.Version)
 		flag.Usage()
 		return
 	}

@@ -235,10 +235,10 @@ func NewHelpPage(app *tview.Application) *HelpPage {
 }
 
 func (p *HelpPage) Show() {
-	text := `GNCDU v0.6.0
+	text := fmt.Sprintf(`GNCDU %s
 
 	https://github.com/bastengao/gncdu
-	`
+	`, Version)
 	modal := tview.NewModal().
 		SetText(text).
 		AddButtons([]string{"OK"}).
