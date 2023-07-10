@@ -18,7 +18,7 @@ Or download executable file from [releases](https://github.com/bastengao/gncdu/r
 
 ### Install from source
 
-    go install github.com/bastengao/gncdu
+    go install github.com/bastengao/gncdu@latest
 
 ## Usage
 
